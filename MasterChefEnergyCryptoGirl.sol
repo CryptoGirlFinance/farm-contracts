@@ -56,8 +56,6 @@ contract MasterChefEnergyCryptoGirl is Ownable, ReentrancyGuard {
     bool public bankAddressIsDefined = false;
     // BANK address.
     Bank public bank;
-    // Dev address.
-    address public devaddr;
     // EGIRL tokens created per block.
     uint256 public egirlPerBlock;
     // Deposit Fee address
@@ -92,20 +90,17 @@ contract MasterChefEnergyCryptoGirl is Ownable, ReentrancyGuard {
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event SetFeeAddress(address indexed user, address indexed _feeAddress);
-    event SetDevAddress(address indexed user, address indexed _devAddress);
     event EmissionRateUpdated(address indexed caller, uint256 previousAmount, uint256 newAmount);
     event RewardLockedUp(address indexed user, uint256 indexed pid, uint256 amountLockedUp);
 
     constructor(
         EnergyCryptoGirlToken _egirl,
-        address _devaddr,
         address _feeAddress,
         uint256 _egirlPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock
     ) public {
         egirl = _egirl;
-        devaddr = _devaddr;
         feeAddress = _feeAddress;
         egirlPerBlock = _egirlPerBlock;
         startBlock = _startBlock;
@@ -113,12 +108,12 @@ contract MasterChefEnergyCryptoGirl is Ownable, ReentrancyGuard {
 
         // staking pool
         poolInfo.push(PoolInfo({
-        lpToken: _egirl,
-        allocPoint: 1000,
-        lastRewardBlock: startBlock,
-        accEgirlPerShare: 0,
-        depositFeeBP: 0,
-        harvestInterval: 1 hours
+            lpToken: _egirl,
+            allocPoint: 1000,
+            lastRewardBlock: startBlock,
+            accEgirlPerShare: 0,
+            depositFeeBP: 0,
+            harvestInterval: 0
         }));
 
         totalAllocPoint = 1000;
@@ -322,14 +317,6 @@ contract MasterChefEnergyCryptoGirl is Ownable, ReentrancyGuard {
         } else {
             bank.transferFromMasterChefsToUser(egirl, _to, _amount);
         }
-    }
-
-    // Update dev address by the previous dev.
-    function dev(address _devaddr) public {
-        require(_devaddr != address(0), "dev: invalid address");
-        require(msg.sender == devaddr, "dev: wut?");
-        devaddr = _devaddr;
-        emit SetDevAddress(msg.sender, _devaddr);
     }
 
     // Update fee address by the previous fee address.
